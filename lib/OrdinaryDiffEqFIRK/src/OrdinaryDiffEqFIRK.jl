@@ -18,11 +18,13 @@ import OrdinaryDiffEqCore: alg_order, calculate_residuals!,
                            get_current_adaptive_order, get_fsalfirstlast,
                            isfirk, generic_solver_docstring
 using MuladdMacro, DiffEqBase, RecursiveArrayTools
+using Polynomials, GenericLinearAlgebra, GenericSchur
 using SciMLOperators: AbstractSciMLOperator
 using LinearAlgebra: I, UniformScaling, mul!, lu
 import LinearSolve
 import FastBroadcast: @..
 import OrdinaryDiffEqCore
+import FastPower
 
 using OrdinaryDiffEqDifferentiation: UJacobianWrapper, build_J_W, build_jac_config,
                                      UDerivativeWrapper, calc_J!, dolinsolve, calc_J,
@@ -42,6 +44,6 @@ include("firk_tableaus.jl")
 include("firk_perform_step.jl")
 include("integrator_interface.jl")
 
-export RadauIIA3, RadauIIA5, RadauIIA9
+export RadauIIA3, RadauIIA5, RadauIIA9, AdaptiveRadau
 
 end

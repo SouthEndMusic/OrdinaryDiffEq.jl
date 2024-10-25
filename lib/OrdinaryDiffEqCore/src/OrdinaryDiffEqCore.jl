@@ -19,6 +19,8 @@ using PrecompileTools
 
 import FillArrays: Trues, Falses
 
+import FastPower
+
 # Interfaces
 import DiffEqBase: solve!, step!, initialize!, isadaptive
 
@@ -58,7 +60,7 @@ using DiffEqBase: check_error!, @def, _vec, _reshape
 
 using FastBroadcast: @.., True, False
 
-using SciMLBase: NoInit, _unwrap_val
+using SciMLBase: NoInit, CheckInit, _unwrap_val
 
 import SciMLBase: alg_order
 
@@ -70,6 +72,7 @@ import DiffEqBase: calculate_residuals,
 import Polyester
 using MacroTools, Adapt
 import ADTypes: AutoFiniteDiff, AutoForwardDiff
+import Accessors: @reset
 
 using SciMLStructures: canonicalize, Tunable, isscimlstructure
 

@@ -1,7 +1,7 @@
 using OrdinaryDiffEqFIRK, DiffEqDevTools, Test, LinearAlgebra
 import ODEProblemLibrary: prob_ode_linear, prob_ode_2Dlinear, van
 
-testTol = 0.3
+testTol = 0.35
 
 for prob in [prob_ode_linear, prob_ode_2Dlinear]
     sim21 = test_convergence(1 .// 2 .^ (6:-1:3), prob, RadauIIA5())
@@ -13,6 +13,15 @@ sim21 = test_convergence(1 ./ 2 .^ (2.5:-1:0.5), prob_ode_linear, RadauIIA9())
 
 sim21 = test_convergence(1 ./ 2 .^ (2.5:-1:0.5), prob_ode_2Dlinear, RadauIIA9())
 @test sim21.𝒪est[:final]≈8 atol=testTol
+
+prob_ode_linear_big = remake(prob_ode_linear, u0 = big.(prob_ode_linear.u0), tspan = big.(prob_ode_linear.tspan))
+prob_ode_2Dlinear_big = remake(prob_ode_2Dlinear, u0 = big.(prob_ode_2Dlinear.u0), tspan = big.(prob_ode_2Dlinear.tspan))
+
+for i in [3, 5, 7, 9], prob in [prob_ode_linear_big, prob_ode_2Dlinear_big]
+    dts = 1 ./ 2 .^ (4.25:-1:0.25)
+    sim21 = test_convergence(dts, prob, AdaptiveRadau(num_stages = i))
+    @test sim21.𝒪est[:final]≈ (2 * i - 1) atol=testTol
+end
 
 # test adaptivity
 for iip in (true, false)

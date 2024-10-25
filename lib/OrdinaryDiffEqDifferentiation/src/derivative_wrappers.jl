@@ -14,7 +14,7 @@ const FIRST_AUTODIFF_TGRAD_MESSAGE = """
 
                                Note 1: this failure occurred inside of the time gradient function. These
                                time gradients are only required by Rosenbrock methods (`Rosenbrock23`,
-                               `Rodas4`, etc.) are are done by automatic differentiation w.r.t. the
+                               `Rodas4`, etc.) and are done by automatic differentiation w.r.t. the
                                argument `t`. If your function is compatible with automatic differentiation
                                w.r.t. `u`, i.e. for Jacobian generation, another way to work around this
                                issue is to switch to a non-Rosenbrock method.
@@ -239,7 +239,7 @@ function jacobian!(J::AbstractMatrix{<:Number}, f, x::AbstractArray{<:Number},
         else
             forwarddiff_color_jacobian!(J, f, x, jac_config)
         end
-        OrdinaryDiffEqCore.increment_nf!(integrator.stats, 1)
+        OrdinaryDiffEqCore.increment_nf!(integrator.stats, maximum(jac_config.colorvec))
     elseif alg_autodiff(alg) isa AutoFiniteDiff
         isforward = alg_difftype(alg) === Val{:forward}
         if isforward
@@ -258,13 +258,11 @@ function jacobian!(J::AbstractMatrix{<:Number}, f, x::AbstractArray{<:Number},
     nothing
 end
 
-function build_jac_config(alg, f::F1, uf::F2, du1, uprev, u, tmp, du2,
-        ::Val{transform} = Val(true)) where {transform, F1, F2}
+function build_jac_config(alg, f::F1, uf::F2, du1, uprev, u, tmp, du2) where {F1, F2}
     haslinsolve = hasfield(typeof(alg), :linsolve)
 
     if !DiffEqBase.has_jac(f) && # No Jacobian if has analytical solution
-       (transform || !DiffEqBase.has_Wfact(f)) && # No Jacobian if has_Wfact and Wfact is the one that's used
-       (!transform || !DiffEqBase.has_Wfact_t(f)) && # No Jacobian has_Wfact and Wfact_t is the one that's used
+       (!DiffEqBase.has_Wfact_t(f)) &&
        ((concrete_jac(alg) === nothing && (!haslinsolve || (haslinsolve && # No Jacobian if linsolve doesn't want it
            (alg.linsolve === nothing || LinearSolve.needs_concrete_A(alg.linsolve))))) ||
         (concrete_jac(alg) !== nothing && concrete_jac(alg))) # Jacobian if explicitly asked for
